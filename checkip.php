@@ -19,7 +19,7 @@ header('Vary: Origin');
 header('Cache-Control: no-store');
 
 function is_public_ipv4($ip){ return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE); }
-function is_public_ipv6($ip){ return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6); }
+function is_public_ipv6($ip){ return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE); }
 function client_ip(){
     $remote = $_SERVER['REMOTE_ADDR'] ?? '';
     $xff    = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
