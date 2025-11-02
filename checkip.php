@@ -249,9 +249,17 @@ a{color:var(--accent);text-decoration:none;} a:hover{text-decoration:underline;}
     <?php
       $uaShort = $ua ?: '—';
       echo '<p class="k">User-Agent: <span class="muted">'.htmlspecialchars($uaShort).'</span></p>';
-      echo '<p class="k">Ora locale: <strong>'.htmlspecialchars($humanTS).'</strong> &middot; <span class="muted">'.htmlspecialchars($tzAbbr).' ('.htmlspecialchars($utcOff).')</span></p>';
-      echo '<p class="k">ISO utente: <span class="muted">'.htmlspecialchars($isoTS).'</span></p>';
+      echo '<p class="k">Ora locale server: <strong>'.htmlspecialchars($humanTS).'</strong> &middot; <span class="muted">'.htmlspecialchars($tzAbbr).' ('.htmlspecialchars($utcOff).')</span></p>';
+      echo '<p class="k">Timestamp ISO 8601: <span class="muted">'.htmlspecialchars($isoTS).'</span></p>';
     ?>
+    <div class="browser-info">
+      <p class="k">Lingua browser: <span id="browserLang" class="muted">—</span></p>
+      <p class="k">Lingue preferite: <span id="browserLangs" class="muted">—</span></p>
+      <p class="k">Ora locale browser: <span id="browserTime" class="muted">—</span></p>
+      <p class="k">Fuso orario browser: <span id="browserTz" class="muted">—</span></p>
+      <p class="k">Schermo: <span id="browserScreen" class="muted">—</span></p>
+      <p class="k">Device Pixel Ratio: <span id="browserDpr" class="muted">—</span></p>
+    </div>
   </div>
 
   <div class="box">
@@ -316,6 +324,57 @@ a{color:var(--accent);text-decoration:none;} a:hover{text-decoration:underline;}
   }
   probe('https://<?= $V4_HOST ?>/checkip.php?plain', ip4, b4);
   probe('https://<?= $V6_HOST ?>/checkip.php?plain', ip6, b6);
+})();
+
+// Dati browser
+(function(){
+  function text(id, value){
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = value || '—';
+  }
+
+  var primaryLang = navigator.language || navigator.userLanguage || '';
+  var languages = Array.isArray(navigator.languages) && navigator.languages.length
+    ? navigator.languages
+    : (primaryLang ? [primaryLang] : []);
+  var tz = (function(){
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    } catch (_) {
+      return '';
+    }
+  })();
+  var formatter;
+  try {
+    formatter = new Intl.DateTimeFormat('it-IT', { dateStyle: 'full', timeStyle: 'medium' });
+  } catch (_) {
+    formatter = null;
+  }
+  var browserTime = formatter ? formatter.format(new Date()) : new Date().toString();
+  var screenInfo = (function(){
+    if (!window.screen) return '';
+    var w = screen.width || 0;
+    var h = screen.height || 0;
+    if (!w || !h) return '';
+    var availW = screen.availWidth || w;
+    var availH = screen.availHeight || h;
+    var base = w + '×' + h + ' px';
+    if (availW && availH && (availW !== w || availH !== h)) {
+      base += ' (area utile ' + availW + '×' + availH + ' px)';
+    }
+    return base;
+  })();
+  var dpr = (typeof window.devicePixelRatio === 'number' && window.devicePixelRatio > 0)
+    ? window.devicePixelRatio.toFixed(2)
+    : '';
+
+  text('browserLang', primaryLang || '—');
+  text('browserLangs', languages.length ? languages.join(', ') : '—');
+  text('browserTime', browserTime || '—');
+  text('browserTz', tz || '—');
+  text('browserScreen', screenInfo || '—');
+  text('browserDpr', dpr || '—');
 })();
 </script>
 </body>
